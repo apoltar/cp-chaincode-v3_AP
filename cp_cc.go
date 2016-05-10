@@ -594,7 +594,10 @@ func GetCompany(companyID string, stub *shim.ChaincodeStub) (Account, error){
 		fmt.Println("Account not found " + companyID)
 		return company, errors.New("Account not found " + companyID)
 	}
-
+	
+	// for debuggung
+	fmt.Println("companyBytes: " + companyBytes)	
+	
 	err = json.Unmarshal(companyBytes, &company)
 	if err != nil {
 		fmt.Println("Error unmarshalling account " + companyID + "\n err:" + err.Error())
