@@ -499,26 +499,25 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	var rechrg Recharge
 	var account Account
 	
-	fmt.Println("Unmarshalling ")
+	fmt.Println("Unmarshalling 1111")
 	err = json.Unmarshal([]byte(args[0]), &rechrg)
 	if err != nil {
 		fmt.Println("error invalid paper issue")
 		return nil, errors.New("Invalid recharge account request")
 	}
 
-	//get account prefix
-	fmt.Println("Getting state of - " + accountPrefix + rechrg.accountOwner)
-	accountBytes, err := stub.GetState(accountPrefix + rechrg.accountOwner)
+	// for debuggung
+	fmt.Println("owner: "+rechrg.accountOwner +" amount:" +  strconv.FormatFloat(rechrg.rechargeAmt, 'f', -1, 32))
+	
+	account,err = GetCompany(rechrg.accountOwner, stub)
 	if err != nil {
-		fmt.Println("Error Getting state of - " + accountPrefix + rechrg.accountOwner)
-		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
+		fmt.Println("Fail to get an account ")
+		return nil, errors.New("Fail to get an account")
 	}
-	err = json.Unmarshal(accountBytes, &account)
-	if err != nil {
-		fmt.Println("Error Unmarshalling accountBytes")
-		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
-	}
-
+	
+	// for debuggung
+	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
+		
 	account.CashBalance += rechrg.rechargeAmt
 
 
