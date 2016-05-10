@@ -517,7 +517,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	// for debuggung
 	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
 		
-	account.CashBalance += rechrg.rechargeAmt
+	//account.CashBalance += rechrg.rechargeAmt
 
 
 	// Write account back
