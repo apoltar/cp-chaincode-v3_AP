@@ -498,7 +498,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	var rechrg Recharge
 	var account Account
 	
-	fmt.Println("Unmarshalling XX123X:" + args[0])
+	fmt.Println("Unmarshalling yyyy:" + args[0])
 	
 	err = json.Unmarshal([]byte(args[0]), &rechrg)
 	if err != nil {
@@ -507,7 +507,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	}
 
 	// for debuggung
-	fmt.Println("owner: "+rechrg.AccountOwner +" amount:" +  rechrg.RechargeAmt)
+	fmt.Println("owner: "+rechrg.AccountOwner +" amount:" +  strconv.FormatFloat(rechrg.RechargeAmt, 'f', -1, 64))
 	
 	account,err = GetCompany(rechrg.AccountOwner, stub)
 	if err != nil {
@@ -562,10 +562,15 @@ func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []stri
 	fmt.Println("Unmarshalling 1112:" + args[0])
 	
 	rechrg.AccountOwner = args[0]
-	rechrg.RechargeAmt = args[1]
+
+	rechrg.RechargeAmt, err = strconv.ParseFloat(args[1], 64)
+	if err != nil {
+		fmt.Println("Fail to convert amt ")
+		return nil, errors.New("Fail to convert amt")
+	}	
 
 	// for debuggung
-	fmt.Println("owner: "+rechrg.AccountOwner +" amount:" +  rechrg.RechargeAmt)
+	fmt.Println("owner: "+rechrg.AccountOwner +" amount:" +  strconv.FormatFloat(rechrg.RechargeAmt, 'f', -1, 64))
 	
 	account,err = GetCompany(rechrg.AccountOwner, stub)
 	if err != nil {
@@ -575,14 +580,9 @@ func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []stri
 	
 	// for debuggung
 	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
-	var amt float64
-	amt, err = strconv.ParseFloat(rechrg.RechargeAmt, 64)
-	if err != nil {
-		fmt.Println("Fail to convert amt ")
-		return nil, errors.New("Fail to convert amt")
-	}
-	
-	account.CashBalance += amt
+
+
+	account.CashBalance += rechrg.RechargeAmt
 
 	// for debuggung
 	fmt.Println("Account closing balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
