@@ -446,7 +446,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
 	}
 
-	account.CashBalance += rechrg.rechargeAmt;
+	account.CashBalance += rechrg.rechargeAmt
 
 
 	// Write account back

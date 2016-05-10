@@ -104,6 +104,13 @@ type Transaction struct {
 	Discount    float64  `json:"discount"`
 }
 
+type Recharge struct {
+	rechargeAmt		float64   `json:"rechargeAmt"`
+	accountOwner	string   `json:"accountOwner"`
+	transactionDate	string   `json:"transactionDate"`
+}
+
+
 func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
     // Initialize the collection of commercial paper keys
     fmt.Println("Initializing paper keys collection")
@@ -472,6 +479,66 @@ func GetCompany(companyID string, stub *shim.ChaincodeStub) (Account, error){
 	return company, nil
 }
 
+func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+
+	/*		0
+		json
+	  	{
+			"rechargeAmt":  0,00,
+			"accountOwner": "string",
+			"transactionDate": "1456161763790"  (current time in milliseconds as a string)
+		}
+	*/
+	//need one arg
+	if len(args) != 1 {
+		fmt.Println("error invalid arguments")
+		return nil, errors.New("Incorrect number of arguments. Expecting recharge account record")
+	}
+
+	var err error
+	var rechrg Recharge
+	var account Account
+	
+	fmt.Println("Unmarshalling ")
+	err = json.Unmarshal([]byte(args[0]), &rechrg)
+	if err != nil {
+		fmt.Println("error invalid paper issue")
+		return nil, errors.New("Invalid recharge account request")
+	}
+
+	//get account prefix
+	fmt.Println("Getting state of - " + accountPrefix + rechrg.accountOwner)
+	accountBytes, err := stub.GetState(accountPrefix + rechrg.accountOwner)
+	if err != nil {
+		fmt.Println("Error Getting state of - " + accountPrefix + rechrg.accountOwner)
+		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
+	}
+	err = json.Unmarshal(accountBytes, &account)
+	if err != nil {
+		fmt.Println("Error Unmarshalling accountBytes")
+		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
+	}
+
+	account.CashBalance += rechrg.rechargeAmt
+
+
+	// Write account back
+	accountBytesToWrite, err := json.Marshal(&account)
+	if err != nil {
+		fmt.Println("Error marshalling Account")
+		return nil, errors.New("Error marshalling Account")
+	}
+	fmt.Println("Put state on toCompany")
+	err = stub.PutState(accountPrefix + rechrg.accountOwner, accountBytesToWrite)
+	if err != nil {
+		fmt.Println("Error writing Account back")
+		return nil, errors.New("Error writing Account back")
+	}
+	
+	fmt.Println("Successfully completed Invoke")
+	return nil, nil
+}
+
 
 // Still working on this one
 func (t *SimpleChaincode) transferPaper(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
@@ -738,6 +805,9 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 	} else if function == "createAccount" {
         fmt.Println("Firing createAccount")
         return t.createAccount(stub, args)
+	} else if function == "rechargeAccount" {
+        fmt.Println("Firing rechargeAccount")
+        return t.rechargeAccount(stub, args)		
     } else if function == "init" {
         fmt.Println("Firing init")
         return t.Init(stub, "init", args)
