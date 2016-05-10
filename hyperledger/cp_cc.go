@@ -498,7 +498,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	var rechrg Recharge
 	var account Account
 	
-	fmt.Println("Unmarshalling XXX:" + args[0])
+	fmt.Println("Unmarshalling XX123X:" + args[0])
 	
 	err = json.Unmarshal([]byte(args[0]), &rechrg)
 	if err != nil {
