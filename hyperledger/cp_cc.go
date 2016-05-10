@@ -105,7 +105,7 @@ type Transaction struct {
 }
 
 type Recharge struct {
-	RechargeAmt		string   `json:"rechargeAmt"`
+	RechargeAmt		float64   `json:"rechargeAmt"`
 	AccountOwner	string   `json:"accountOwner"`
 }
 
@@ -518,7 +518,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	// for debuggung
 	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
 		
-	//account.CashBalance += rechrg.rechargeAmt
+	account.CashBalance += rechrg.RechargeAmt
 
 
 	// Write account back
