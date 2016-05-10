@@ -105,9 +105,8 @@ type Transaction struct {
 }
 
 type Recharge struct {
-	rechargeAmt		float64   `json:"rechargeAmt"`
-	accountOwner	string   `json:"accountOwner"`
-	transactionDate	string   `json:"transactionDate"`
+	RechargeAmt		string   `json:"rechargeAmt"`
+	AccountOwner	string   `json:"accountOwner"`
 }
 
 func (t *SimpleChaincode) init(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
@@ -406,6 +405,7 @@ func (t *SimpleChaincode) issueCommercialPaper(stub *shim.ChaincodeStub, args []
 	}
 }
 
+
 func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
 
 	/*		0
@@ -426,27 +426,27 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	var rechrg Recharge
 	var account Account
 	
-	fmt.Println("Unmarshalling ")
+	fmt.Println("Unmarshalling XXX:" + args[0])
+	
 	err = json.Unmarshal([]byte(args[0]), &rechrg)
 	if err != nil {
 		fmt.Println("error invalid paper issue")
 		return nil, errors.New("Invalid recharge account request")
 	}
 
-	//get account prefix
-	fmt.Println("Getting state of - " + accountPrefix + rechrg.accountOwner)
-	accountBytes, err := stub.GetState(accountPrefix + rechrg.accountOwner)
+	// for debuggung
+	fmt.Println("owner: "+rechrg.AccountOwner +" amount:" +  rechrg.RechargeAmt)
+	
+	account,err = GetCompany(rechrg.AccountOwner, stub)
 	if err != nil {
-		fmt.Println("Error Getting state of - " + accountPrefix + rechrg.accountOwner)
-		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
+		fmt.Println("Fail to get an account ")
+		return nil, errors.New("Fail to get an account")
 	}
-	err = json.Unmarshal(accountBytes, &account)
-	if err != nil {
-		fmt.Println("Error Unmarshalling accountBytes")
-		return nil, errors.New("Error retrieving account " + rechrg.accountOwner)
-	}
-
-	account.CashBalance += rechrg.rechargeAmt
+	
+	// for debuggung
+	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
+		
+	//account.CashBalance += rechrg.rechargeAmt
 
 
 	// Write account back
@@ -456,7 +456,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 		return nil, errors.New("Error marshalling Account")
 	}
 	fmt.Println("Put state on toCompany")
-	err = stub.PutState(accountPrefix + rechrg.accountOwner, accountBytesToWrite)
+	err = stub.PutState(accountPrefix + rechrg.AccountOwner, accountBytesToWrite)
 	if err != nil {
 		fmt.Println("Error writing Account back")
 		return nil, errors.New("Error writing Account back")
@@ -465,6 +465,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	fmt.Println("Successfully completed Invoke")
 	return nil, nil
 }
+
 
 func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
 
@@ -488,13 +489,13 @@ func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []stri
 	
 	fmt.Println("Unmarshalling 1112:" + args[0])
 	
-	rechrg.accountOwner = args[0]
-	rechrg.rechargeAmt = args[1]
+	rechrg.AccountOwner = args[0]
+	rechrg.RechargeAmt = args[1]
 
 	// for debuggung
-	fmt.Println("owner: "+rechrg.accountOwner +" amount:" +  rechrg.rechargeAmt)
+	fmt.Println("owner: "+rechrg.AccountOwner +" amount:" +  rechrg.RechargeAmt)
 	
-	account,err = GetCompany(rechrg.accountOwner, stub)
+	account,err = GetCompany(rechrg.AccountOwner, stub)
 	if err != nil {
 		fmt.Println("Fail to get an account ")
 		return nil, errors.New("Fail to get an account")
@@ -503,7 +504,7 @@ func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []stri
 	// for debuggung
 	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
 	var amt float64
-	amt, err = strconv.ParseFloat(rechrg.rechargeAmt, 64)
+	amt, err = strconv.ParseFloat(rechrg.RechargeAmt, 64)
 	if err != nil {
 		fmt.Println("Fail to convert amt ")
 		return nil, errors.New("Fail to convert amt")
@@ -522,7 +523,7 @@ func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []stri
 		return nil, errors.New("Error marshalling Account")
 	}
 	fmt.Println("Put state on toCompany")
-	err = stub.PutState(accountPrefix + rechrg.accountOwner, accountBytesToWrite)
+	err = stub.PutState(accountPrefix + rechrg.AccountOwner, accountBytesToWrite)
 	if err != nil {
 		fmt.Println("Error writing Account back")
 		return nil, errors.New("Error writing Account back")
