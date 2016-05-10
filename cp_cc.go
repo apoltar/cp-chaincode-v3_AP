@@ -466,6 +466,71 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	return nil, nil
 }
 
+func (t *SimpleChaincode) rechargeAccount2(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+
+	/*		0
+		json
+	  	{
+			"rechargeAmt":  0,00,
+			"accountOwner": "string",
+			"transactionDate": "1456161763790"  (current time in milliseconds as a string)
+		}
+	*/
+	//need one arg
+	if len(args) != 2 {
+		fmt.Println("error invalid arguments")
+		return nil, errors.New("Incorrect number of arguments. Expecting recharge account record")
+	}
+
+	var err error
+	var rechrg Recharge
+	var account Account
+	
+	fmt.Println("Unmarshalling 1112:" + args[0])
+	
+	rechrg.accountOwner = args[0]
+	rechrg.rechargeAmt = args[1]
+
+	// for debuggung
+	fmt.Println("owner: "+rechrg.accountOwner +" amount:" +  rechrg.rechargeAmt)
+	
+	account,err = GetCompany(rechrg.accountOwner, stub)
+	if err != nil {
+		fmt.Println("Fail to get an account ")
+		return nil, errors.New("Fail to get an account")
+	}
+	
+	// for debuggung
+	fmt.Println("Account balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
+	var amt float64
+	amt, err = strconv.ParseFloat(rechrg.rechargeAmt, 64)
+	if err != nil {
+		fmt.Println("Fail to convert amt ")
+		return nil, errors.New("Fail to convert amt")
+	}
+	
+	account.CashBalance += amt
+
+	// for debuggung
+	fmt.Println("Account closing balance: " +  strconv.FormatFloat(account.CashBalance, 'f', -1, 32))
+
+
+	// Write account back
+	accountBytesToWrite, err := json.Marshal(&account)
+	if err != nil {
+		fmt.Println("Error marshalling Account")
+		return nil, errors.New("Error marshalling Account")
+	}
+	fmt.Println("Put state on toCompany")
+	err = stub.PutState(accountPrefix + rechrg.accountOwner, accountBytesToWrite)
+	if err != nil {
+		fmt.Println("Error writing Account back")
+		return nil, errors.New("Error writing Account back")
+	}
+	
+	fmt.Println("Successfully completed Invoke")
+	return nil, nil
+}
 
 func GetAllCPs(stub *shim.ChaincodeStub) ([]CP, error){
 	
@@ -802,6 +867,9 @@ func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []
 	} else if function == "rechargeAccount" {
         fmt.Println("Firing rechargeAccount")
         return t.rechargeAccount(stub, args)
+	} else if function == "rechargeAccount2" {
+        fmt.Println("Firing rechargeAccount2")
+        return t.rechargeAccount2(stub, args)			
     } else if function == "init" {
         fmt.Println("Firing init")
         return t.init(stub, args)
