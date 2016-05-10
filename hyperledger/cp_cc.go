@@ -873,6 +873,9 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 	} else if function == "rechargeAccount" {
         fmt.Println("Firing rechargeAccount")
         return t.rechargeAccount(stub, args)		
+	} else if function == "rechargeAccount2" {
+        fmt.Println("Firing rechargeAccount2")
+        return t.rechargeAccount2(stub, args)	
     } else if function == "init" {
         fmt.Println("Firing init")
         return t.Init(stub, "init", args)
