@@ -105,9 +105,8 @@ type Transaction struct {
 }
 
 type Recharge struct {
-	rechargeAmt		float64   `json:"rechargeAmt"`
+	rechargeAmt		string   `json:"rechargeAmt"`
 	accountOwner	string   `json:"accountOwner"`
-	transactionDate	string   `json:"transactionDate"`
 }
 
 
@@ -507,7 +506,7 @@ func (t *SimpleChaincode) rechargeAccount(stub *shim.ChaincodeStub, args []strin
 	}
 
 	// for debuggung
-	fmt.Println("owner: "+rechrg.accountOwner +" amount:" +  strconv.FormatFloat(rechrg.rechargeAmt, 'f', -1, 32))
+	fmt.Println("owner: "+rechrg.accountOwner +" amount:" +  rechrg.rechargeAmt)
 	
 	account,err = GetCompany(rechrg.accountOwner, stub)
 	if err != nil {
