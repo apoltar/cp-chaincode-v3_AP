@@ -450,7 +450,10 @@ func GetCP(cpid string, stub *shim.ChaincodeStub) (CP, error){
 		fmt.Println("Error retrieving cp " + cpid)
 		return cp, errors.New("Error retrieving cp " + cpid)
 	}
-		
+	
+	// for debuggung
+	fmt.Println("cpBytes: " + string(cpBytes))
+			
 	err = json.Unmarshal(cpBytes, &cp)
 	if err != nil {
 		fmt.Println("Error unmarshalling cp " + cpid)
@@ -874,7 +877,7 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
         fmt.Println("Firing createAccount")
         return t.createAccount(stub, args)
 	} else if function == "rechargeAccount" {
-        fmt.Println("Firing rechargeAccount")
+        fmt.Println("Firing rechargeAccount!")
         return t.rechargeAccount(stub, args)		
 	} else if function == "rechargeAccount2" {
         fmt.Println("Firing rechargeAccount2")
